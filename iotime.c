@@ -1,3 +1,4 @@
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -17,10 +18,13 @@ int main(int argc, char *argv[]) {
     }
     pid_t pid_io = fork();
     if (pid_io == 0) {
-	dup2(2, 1);
-	char *args[] = {"iostat", "-p", "sdb", "2"};
-	execvp("iostat", args);
-	printf("execvp failed\n");
+	freopen("/dev/null", "r", stdin);
+	freopen("/dev/null", "w", stdout);
+	freopen("/dev/null", "w", stderr);
+	char *args[] = {"sar", "-o", "sa", "2", NULL};
+	execvp("sar", args);
+	printf("exec failed\n");
+	printf("exec failed: %d\n", errno);
 	exit(-1);
     }
     int status = 0;
